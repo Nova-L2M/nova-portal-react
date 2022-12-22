@@ -116,8 +116,27 @@ class Boss {
           timer.innerHTML = countdown;
         }
       },
-      countdown.HOURS | countdown.MINUTES | countdown.SECONDS);
+      countdown.HOURS | countdown.MINUTES | countdown.SECONDS
+    );
+    // create a modal that opens when the boss is clicked
+    newElement.addEventListener("click", () => {
+      console.log(`clicked ${this.name}`);
+      this.openModal();
+    });
     return newElement;
+  }
+  openModal() {
+    let modal = document.getElementById("boss-modal");
+    let modalContent = modal.querySelector(".modal-content");
+    let modalClose = modal.querySelector(".modal-close");
+    // animate the modal to open
+    modal.classList.add("show");
+    modalContent.classList.add("show");
+    // animate the modal to close
+    modalClose.addEventListener("click", () => {
+      modal.classList.remove("show");
+      modalContent.classList.remove("show");
+    } );
   }
   updateBoss(data) {
     this.last_killed = data.last_killed;
