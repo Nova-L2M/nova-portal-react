@@ -67,9 +67,9 @@ passport.use(
           }
           const updateUser = await database.updateUser(uid, updatedUser);
           if (updateUser.success === true) {
-            console.log("User updated successfully.")
+            console.log("USER UPDATED SUCCESSFULLY.")
           } else {
-            console.log("Error updating user.")
+            console.log("ERROR UPDATING USER.")
           }
           done(null, searchUser.user)
           return searchUser.user

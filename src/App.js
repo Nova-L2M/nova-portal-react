@@ -1,16 +1,26 @@
 import styled from "styled-components";
 import { createGlobalStyle } from "styled-components";
 import Boss from "./components/Boss";
-import bossData from "./components/Boss/boss_data";
 import { useEffect, useContext } from "react";
 import { AuthContext } from "./contexts/AuthContext";
+import {
+  Routes,
+  Route,
+  useSearchParams
+} from "react-router-dom";
+import { useLogin } from "./hooks/useLogin";
 import bgImg from "./images/background.jpeg";
 import spinner from "./images/loading-spinner.svg";
+import Bosses from "./pages/Bosses";
+import Login from "./pages/Login";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "./firebase/config";
+import Isotope from "isotope-layout";
 
 export default function App() {
-  // const { user, authIsReady } = useContext(AuthContext);
-  const user = true,
-    authIsReady = true;
+  const { user, authIsReady } = useContext(AuthContext);
+  // const user = true,
+  //   authIsReady = true;
   return authIsReady ? (
     user ? (
       <AuthenticatedApp user={user} />
@@ -24,18 +34,22 @@ export default function App() {
 
 function Loading() {
   return (
-    <>
-      <GlobalStyle />
-      <AppWrapper>
-        <Container className="full-centered">
-          <Row>
-            <Column className="centered">
-              <LoadingSpinner src={spinner} />
-            </Column>
-          </Row>
-        </Container>
-      </AppWrapper>
-    </>
+      <Routes>
+        <Route exact path="/" element={
+          <>
+            <GlobalStyle />
+            <AppWrapper>
+              <Container className="full-centered">
+                <Row>
+                  <Column className="centered">
+                    <LoadingSpinner src={spinner} />
+                  </Column>
+                </Row>
+              </Container>
+            </AppWrapper>
+          </>
+        } />
+      </Routes>
   );
 }
 
@@ -44,78 +58,119 @@ function AuthenticatedApp() {
   useEffect(() => {
     let isUpdating = Object.keys(bosses).length > 1;
     if (isUpdating) {
+    
     } else {
       addBosses();
     }
   });
-  function addBosses() {
-    let bossTable = document.getElementById("boss-list");
-    for (const boss in bossData) {
-      let key = bossData[`${boss}`];
-      let bossObject = new Boss(bossTable, {
-        id: boss,
-        name: key.name,
-        image: boss,
-        level: key.level,
-        is_server_boss: key.is_server_boss,
-        is_interval_timer: key.is_interval_timer,
-        interval: key.interval,
-        last_killed: key.last_killed,
-        next_spawn: key.next_spawn,
-        spawns: key.spawns,
-        rarity: key.rarity,
-        rate: key.rate,
-        updated_by: key.updated_by
+  async function addBosses() {
+    let bossTable = document.getElementById("boss-list-body");
+    const q = query(collection(db, "bosses"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          let key = doc.id;
+          let bossObject = new Boss(bossTable, {
+            id: key,
+            name: doc.data().name,
+            image: doc.id,
+            level: doc.data().level,
+            is_server_boss: doc.data().is_server_boss,
+            is_interval_timer: doc.data().is_interval_timer,
+            interval: doc.data().interval,
+            last_killed: doc.data().last_killed,
+            next_spawn: doc.data().next_spawn,
+            spawns: doc.data().spawns,
+            rarity: doc.data().rarity,
+            rate: doc.data().rate,
+            updated_by: doc.data().updated_by
+          });
+          bosses[`${key}`] = bossObject;
+          // if this is the last boss, then init set column widths and init isotope
+          if (Object.keys(bosses).length === querySnapshot.size) {
+            setTable(initIsotope);
+          }
       });
-      bosses[`${boss}`] = bossObject;
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+            console.log("Modified Boss: ", change.doc.data());
+            let key = change.doc.id;
+            let bossObject = bosses[`${key}`];
+            bossObject.updateBoss(change.doc.data());
+        }
+      });
+    });
+  }
+  function setTable(callback) {
+    // Set the width for each column in the table header
+    let headerArray = document.querySelectorAll("th");
+    headerArray.forEach((header) => {
+      let width = header.offsetWidth;
+      header.style.width = `${width}px`;
+    });
+    // TODO: Set the width for each column
+    let rowArray = document.querySelectorAll(".boss-row");
+    rowArray.forEach((row) => {
+      let columnArray = row.querySelectorAll("td");
+      columnArray.forEach((column) => {
+        let width = column.offsetWidth;
+        column.style.width = `${width}px`;
+      });
+    });
+    if (callback) {
+      callback();
     }
   }
+  function initIsotope() {
+    // init Isotope
+    console.log('init isotope');
+    var iso = new Isotope( '#boss-list', {
+      itemSelector: '.boss-row',
+      layoutMode: 'vertical',
+      getSortData: {
+        timestamp: '[data-timestamp] parseInt'
+      }
+    });
+    // sort by timestamp
+    iso.arrange({ sortBy: 'timestamp' });
+    // adjust height of boss-list-body
+    let bossListBody = document.getElementById("boss-list-body");
+    let bossList = document.getElementById("boss-list");
+    bossListBody.style.height = `${bossList.offsetHeight}px`;
+  }
   return (
-    <>
-      <GlobalStyle />
-      <AppWrapper>
-        <Container>
-          <Row>
-            <Column>
-              <table id="boss-list" cellPadding="0" cellSpacing="0">
-                <thead>
-                  <tr>
-                    <th>Boss</th>
-                    <th>Last</th>
-                    <th>Next</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-              </table>
-            </Column>
-          </Row>
-        </Container>
-      </AppWrapper>
-    </>
+      <Routes>
+        <Route exact path="/" element={
+          <>
+            <GlobalStyle />
+            <AppWrapper>
+              <Bosses />
+            </AppWrapper>
+          </>
+        } />
+      </Routes>
   );
 }
 
 function UnauthenticatedApp() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const { login, isPending } = useLogin();
+
+  useEffect(() => {
+    if (token) {
+      login(token);
+    }
+  }, [token, login]);
+
   return (
-    <>
-      <GlobalStyle />
-      <AppWrapper>
-        <Container className="full-centered">
-          <Row>
-            <Column className="centered">
-              <LoginWrapper>
-                <h1>Login Required</h1>
-                <p>
-                  You have to be a member of the Revolution alliance to use this
-                  app.
-                </p>
-                <LoginButton>Authenticate with Discord</LoginButton>
-              </LoginWrapper>
-            </Column>
-          </Row>
-        </Container>
-      </AppWrapper>
-    </>
+      <Routes>
+        <Route exact path="/" element={
+          <>
+            <GlobalStyle />
+            <Login isPending={isPending} />
+          </>
+        } />
+      </Routes>
   );
 }
 const ctaColor = (opacity) => {
@@ -230,6 +285,25 @@ const GlobalStyle = createGlobalStyle`
     text-transform: none;
     font-style: italic;
   }
+  .boss-row {
+    width: 100%;
+  }
+  #boss-list-body {
+    position:relative;
+  }
+  .countdown {
+    display: flex;
+    align-items: center;
+    column-gap: 5px;
+    font-size: 10px;
+    font-weight: 300;
+    color: #fff;
+    width: 150px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    justify-content: center;
+  }
 `;
 const AppWrapper = styled.div`
   min-height: 100vh;
@@ -310,12 +384,14 @@ const LoginButton = styled.button`
   color: #fff;
   font-weight: 200;
   text-transform: uppercase;
-  text-shadow: 1px 0px 1px ${ctaColor}, 0px 1px 1px ${ctaColor},
-    1px 1px 1px ${ctaColor}, -1px 0px 1px ${ctaColor}, 0px -1px 1px ${ctaColor},
-    -1px -1px 1px ${ctaColor};
+  text-shadow: 1px 0px 1px ${ctaColor()}, 0px 1px 1px ${ctaColor()},
+    1px 1px 1px ${ctaColor()}, -1px 0px 1px ${ctaColor()}, 0px -1px 1px ${ctaColor()},
+    -1px -1px 1px ${ctaColor()};
   box-shadow: 0px 0px 15px 0px red;
   transition: all ease 0.2s;
   &:hover {
     background-color: ${ctaColor(100)};
   }
 `;
+
+export { AppWrapper, Container, Row, Column, ctaColor, GlobalStyle }

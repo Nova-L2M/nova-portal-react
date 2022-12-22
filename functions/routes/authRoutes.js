@@ -35,14 +35,6 @@ module.exports = (app) => {
       const callback_url = whitelist[referrer] || whitelist['default'];
 
       const customToken = await admin.auth().createCustomToken(req.user.uid);
-      // Test callback
-      // return res.status(200).json({ 
-      //   success: true,
-      //   referrer: referrer,
-      //   callback_url: callback_url,
-      //   message: 'Success! The Codeup Authentication App has successfully confirmed you are a member of the CodeupClassroom organization on Github. A JWT can be generated from here to be returned back to the frontend. You can navigate to /api/user to see your user object saved in user table.',
-      //   jwt: customToken
-      // })
 
       // Production callback
       if (callback_url != whitelist['default'])
@@ -52,8 +44,8 @@ module.exports = (app) => {
   )
   app.get(
     "/login/:referrer", async function (req, res) {
-      //console.log("REFERRER FOLLOWS:");
-      //console.log(req.param("referrer"));
+      console.log("REFERRER FOLLOWS:");
+      console.log(req.param("referrer"));
       referrer = req.params.referrer || "Unknown";
       res.redirect("/api/login");
     }
