@@ -34,22 +34,22 @@ export default function App() {
 
 function Loading() {
   return (
-      <Routes>
-        <Route exact path="/" element={
-          <>
-            <GlobalStyle />
-            <AppWrapper>
-              <Container className="full-centered">
-                <Row>
-                  <Column className="centered">
-                    <LoadingSpinner src={spinner} />
-                  </Column>
-                </Row>
-              </Container>
-            </AppWrapper>
-          </>
-        } />
-      </Routes>
+    <Routes>
+      <Route exact path="/" element={
+        <>
+          <GlobalStyle />
+          <AppWrapper>
+            <Container className="full-centered">
+              <Row>
+                <Column className="centered">
+                  <LoadingSpinner src={spinner} />
+                </Column>
+              </Row>
+            </Container>
+          </AppWrapper>
+        </>
+      } />
+    </Routes>
   );
 }
 
@@ -58,7 +58,7 @@ function AuthenticatedApp() {
   useEffect(() => {
     let isUpdating = Object.keys(bosses).length > 1;
     if (isUpdating) {
-    
+
     } else {
       addBosses();
     }
@@ -68,34 +68,36 @@ function AuthenticatedApp() {
     const q = query(collection(db, "bosses"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       querySnapshot.forEach((doc) => {
-          let key = doc.id;
-          let bossObject = new Boss(bossTable, {
-            id: key,
-            name: doc.data().name,
-            image: doc.id,
-            level: doc.data().level,
-            is_server_boss: doc.data().is_server_boss,
-            is_interval_timer: doc.data().is_interval_timer,
-            interval: doc.data().interval,
-            last_killed: doc.data().last_killed,
-            next_spawn: doc.data().next_spawn,
-            spawns: doc.data().spawns,
-            rarity: doc.data().rarity,
-            rate: doc.data().rate,
-            updated_by: doc.data().updated_by
-          });
-          bosses[`${key}`] = bossObject;
-          // if this is the last boss, then init set column widths and init isotope
-          if (Object.keys(bosses).length === querySnapshot.size) {
-            setTable(initIsotope);
-          }
+        let key = doc.id;
+        let bossObject = new Boss(bossTable, {
+          id: key,
+          name: doc.data().name,
+          image: doc.id,
+          level: doc.data().level,
+          is_server_boss: doc.data().is_server_boss,
+          is_interval_timer: doc.data().is_interval_timer,
+          interval: doc.data().interval,
+          last_killed: doc.data().last_killed,
+          next_spawn: doc.data().next_spawn,
+          spawns: doc.data().spawns,
+          rarity: doc.data().rarity,
+          rate: doc.data().rate,
+          updated_by: doc.data().updated_by
+        });
+        bosses[`${key}`] = bossObject;
+        // if this is the last boss, then init set column widths and init isotope
+        if (Object.keys(bosses).length === querySnapshot.size) {
+          setTable(initIsotope);
+        }
       });
       querySnapshot.docChanges().forEach((change) => {
         if (change.type === "modified") {
-            console.log("Modified Boss: ", change.doc.data());
-            let key = change.doc.id;
-            let bossObject = bosses[`${key}`];
+          console.log("Modified Boss: ", change.doc.data());
+          let key = change.doc.id;
+          let bossObject = bosses[`${key}`];
+          if (bossObject.is_interval_timer) {
             bossObject.updateBoss(change.doc.data());
+          }
         }
       });
     });
@@ -123,7 +125,7 @@ function AuthenticatedApp() {
   function initIsotope() {
     // init Isotope
     console.log('init isotope');
-    var iso = new Isotope( '#boss-list', {
+    var iso = new Isotope('#boss-list', {
       itemSelector: '.boss-row',
       layoutMode: 'vertical',
       getSortData: {
@@ -138,16 +140,16 @@ function AuthenticatedApp() {
     bossListBody.style.height = `${bossList.offsetHeight}px`;
   }
   return (
+    <AppWrapper>
+      <GlobalStyle />
       <Routes>
         <Route exact path="/" element={
           <>
-            <GlobalStyle />
-            <AppWrapper>
               <Bosses />
-            </AppWrapper>
           </>
         } />
       </Routes>
+    </AppWrapper>
   );
 }
 
@@ -163,19 +165,28 @@ function UnauthenticatedApp() {
   }, [token, login]);
 
   return (
-      <Routes>
-        <Route exact path="/" element={
-          <>
-            <GlobalStyle />
-            <Login isPending={isPending} />
-          </>
-        } />
-      </Routes>
+    <Routes>
+      <Route exact path="/" element={
+        <>
+          <GlobalStyle />
+          <Login isPending={isPending} />
+        </>
+      } />
+    </Routes>
   );
 }
 const ctaColor = (opacity) => {
   return `rgb(255 103 0${opacity ? ` / ${opacity}%` : ""})`;
 };
+const burnColors = [
+  '#f2c9fe66', 
+  '#ee85fe66', 
+  '#ae34ff66', 
+  '#d80cec66',
+  '#6c06cd66', 
+  '#5e169766', 
+  '#2a0e4566'
+];
 const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
@@ -304,6 +315,47 @@ const GlobalStyle = createGlobalStyle`
     padding: 10px;
     justify-content: center;
   }
+  .fire {
+    animation: burn 1.5s linear infinite alternate;
+  }
+  @keyframes burn {
+    from { 
+      box-shadow: -.1em 0 .3em ${burnColors[0]}, 
+                  .1em -.1em .3em ${burnColors[1]}, 
+                  -.2em -.2em .4em ${burnColors[2]}, 
+                  .2em -.3em .3em ${burnColors[3]},
+                   -.2em -.4em .4em ${burnColors[4]}, 
+                   .1em -.5em .7em ${burnColors[5]}, 
+                   .1em -.7em .7em ${burnColors[6]}; 
+    }
+    45%  { 
+      box-shadow: .1em -.2em .5em ${burnColors[0]}, 
+                  .15em 0 .4em ${burnColors[1]}, 
+                  -.1em -.25em .5em ${burnColors[2]}, 
+                  .15em -.45em .5em ${burnColors[3]}, 
+                  -.1em -.5em .6em ${burnColors[4]}, 
+                  0 -.8em .6em ${burnColors[5]}, 
+                  .2em -1em .8em ${burnColors[6]}; 
+    }
+    70%  { 
+      box-shadow: -.1em 0 .3em ${burnColors[0]}, 
+                  .1em -.1em .3em ${burnColors[1]}, 
+                  -.2em -.2em .6em ${burnColors[2]}, 
+                  .2em -.3em .4em ${burnColors[3]}, 
+                  -.2em -.4em .7em ${burnColors[4]}, 
+                  .1em -.5em .7em ${burnColors[5]}, 
+                  .1em -.7em .9em ${burnColors[6]}; 
+    }
+    to   { 
+      box-shadow: -.1em -.2em .6em ${burnColors[0]}, 
+                  -.15em 0 .6em ${burnColors[1]}, 
+                  .1em -.25em .6em ${burnColors[2]}, 
+                  -.15em -.45em .5em ${burnColors[3]}, 
+                  .1em -.5em .6em ${burnColors[4]}, 
+                  0 -.8em .6em ${burnColors[5]}, 
+                  -.2em -1em .8em ${burnColors[6]}; 
+    }
+  }
 `;
 const AppWrapper = styled.div`
   min-height: 100vh;
@@ -321,7 +373,8 @@ const AppWrapper = styled.div`
   background-size: contain;
   background-repeat: no-repeat;
   background-color: #000;
-  padding: 20px 0;
+  background-attachment: fixed;
+  padding: 145px 0 75px 0;
 `;
 const Container = styled.div`
   display: flex;

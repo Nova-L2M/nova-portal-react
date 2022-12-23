@@ -72,7 +72,7 @@ class Boss {
       <tr class="boss-row" id="${this.id}" data-timestamp="${nextSpawnTimestamp}">
         <td>
           <div class="td-row">
-            <div class="boss-avatar-wrapper">
+            <div class="boss-avatar-wrapper${(this.rarity == 'legendary' && this.is_server_boss) ? ' fire' : ''}">
               <img src="${this.image}" class="boss-avatar" />
             </div>
             <div class="boss-name-wrapper">
@@ -122,40 +122,48 @@ class Boss {
     `;
     this.parent.insertAdjacentHTML("beforeend", html);
     let newElement = document.getElementById(this.id);
-    countdown(
+    let timerId = countdown(
       new Date(nextSpawn), 
       (ts) => {
         let countdown = ts.toHTML();
         let timer = newElement.querySelector(`[data-countdown="${this.id}"]`);
         if (ts.value > 0) {
-          timer.innerHTML = countdown;
-          // timer.innerHTML = "Spawned!";
+            timer.innerHTML = `${countdown}`;
         }
         else {
           timer.innerHTML = countdown;
         }
       },
-      countdown.DAYS | countdown.HOURS | countdown.MINUTES | countdown.SECONDS
+      countdown.DAYS | countdown.HOURS | countdown.MINUTES | countdown.SECONDS,
+      2
     );
     // create a modal that opens when the boss is clicked
-    newElement.addEventListener("click", () => {
-      console.log(`clicked ${this.name}`);
-      this.openModal();
-    });
+    if (this.is_interval_timer) {
+      newElement.addEventListener("click", () => {
+        console.log(`clicked ${this.name}`);
+        this.openModal();
+      });
+    }
     return newElement;
   }
   openModal() {
     let modal = document.getElementById("boss-modal");
     let modalContent = modal.querySelector(".modal-content");
     let modalClose = modal.querySelector(".modal-close");
+    let modalBG = modal.querySelector("[data-modal-bg]");
     // animate the modal to open
     modal.classList.add("show");
     modalContent.classList.add("show");
-    // animate the modal to close
+    // animate the modal to close if the user clicks the close button or the background
     modalClose.addEventListener("click", () => {
       modal.classList.remove("show");
       modalContent.classList.remove("show");
-    } );
+    }); 
+    modalBG.addEventListener("click", () => {
+      modal.classList.remove("show");
+      modalContent.classList.remove("show");
+    });
+    
   }
   updateBoss(data) {
     this.last_killed = data.last_killed;
