@@ -32,23 +32,42 @@ class Boss {
     this.rarity = data.rarity;
     this.rate = data.rate;
     this.updated_by = data.updated_by;
+    this.spawns = data.is_interval_timer ? null : data.spawns;
     this.parent = parent;
     this.timer = null;
     this.element = this.render();
   }
   render() {
-    let server, lastKilled, nextSpawnTimestamp, nextSpawn, updatedBy;
-    if (this.is_server_boss) {
+    let server, lastKilledTimestamp, lastKilled, nextSpawnTimestamp, nextSpawn, updatedBy;
+    if (this.is_interval_timer) {
       server = 3;
-      lastKilled = this.last_killed[server].seconds;
-      lastKilled = new Date(lastKilled*1000);
-      nextSpawnTimestamp = this.next_spawn[server].seconds;
-      nextSpawn = new Date(nextSpawnTimestamp*1000);
-      updatedBy = this.updated_by[server];
+      lastKilledTimestamp = this.is_server_boss ? this.last_killed[server].seconds : this.last_killed.seconds;
+      lastKilled = new Date(lastKilledTimestamp*1000).toLocaleString();
+      nextSpawnTimestamp = this.is_server_boss ? this.next_spawn[server].seconds : this.next_spawn.seconds;
+      nextSpawn = new Date(nextSpawnTimestamp*1000).toLocaleString();
+      updatedBy = this.is_server_boss ? this.updated_by[server] : this.updated_by;
     } else {
-      nextSpawn = "--";
-      nextSpawnTimestamp = "--";
+      lastKilled = "--";
+      lastKilledTimestamp = "--";
+      
+      let recurringTimesArray = this.spawns;
+      // get timestamp for right now
+      let now = Math.floor(Date.now() / 1000);
+      // For each object in the array, calculate the next time it will occur. Save the next time in a new array.
+      let nextTimesArray = [];
+      recurringTimesArray.forEach((time) => {
+          let nextTime = time.start;
+          while (nextTime < now) {
+              nextTime += time.interval;
+          }
+          nextTimesArray.push(nextTime);
+      });
+      // Get the smallest value in the array
+      nextSpawnTimestamp = Math.min(...nextTimesArray);
+      // Convert the timestamp to a date
+      nextSpawn = new Date(nextSpawnTimestamp * 1000).toLocaleString();
     }
+
     let html = `
       <tr class="boss-row" id="${this.id}" data-timestamp="${nextSpawnTimestamp}">
         <td>
@@ -75,10 +94,10 @@ class Boss {
         <td>
           <div class="td-column">
             ${
-              this.is_server_boss
+              this.is_interval_timer
                 ? `
               <h5 class="subdue">Last Kill</h5>
-              <h5 data-last-killed="${this.last_killed[server].seconds}">${lastKilled.toLocaleString()}</h5>
+              <h5 data-last-killed="${lastKilledTimestamp}">${lastKilled}</h5>
               <h5 class="updatedby" data-updated-by="${updatedBy}">Updated By ${updatedBy}</h5>
               `
                 : ""
@@ -88,7 +107,7 @@ class Boss {
         <td>
           <div class="td-column">
             <h5 class="subdue">Next Spawn</h5>
-            <h5 data-next-spawn="${nextSpawnTimestamp}">${nextSpawn.toLocaleString()}</h5>
+            <h5 data-next-spawn="${nextSpawnTimestamp}">${nextSpawn}</h5>
             <h5 class="updatedby">${this.rate}% Chance</h5>
           </div>
         </td>
@@ -116,7 +135,7 @@ class Boss {
           timer.innerHTML = countdown;
         }
       },
-      countdown.HOURS | countdown.MINUTES | countdown.SECONDS
+      countdown.DAYS | countdown.HOURS | countdown.MINUTES | countdown.SECONDS
     );
     // create a modal that opens when the boss is clicked
     newElement.addEventListener("click", () => {

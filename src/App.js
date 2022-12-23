@@ -298,7 +298,7 @@ const GlobalStyle = createGlobalStyle`
     font-size: 10px;
     font-weight: 300;
     color: #fff;
-    width: 150px;
+    width: 200px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: rgba(0, 0, 0, 0.6);
     padding: 10px;
