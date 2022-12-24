@@ -28,7 +28,7 @@ Project Nova is a web app to reinforce the efforts of the Revolution Alliance. R
 - React code is in the `src` folder
 - The `functions` folder holds the serverless functions hosted by Firebase. For now, it's the endpoint that handles the Authentication workflow.
 
-##Deployment
+## Deployment
 - First run `npm run build`
 - Then run `firebase deploy`
 - If it's your first time deploying, you may have to init firebase by first running `firebase init`
