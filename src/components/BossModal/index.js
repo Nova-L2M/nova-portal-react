@@ -1,24 +1,55 @@
+import React from 'react';
 import styled from 'styled-components';
+import $ from 'jquery';
+import timepicker from 'timepicker'
+import 'timepicker/jquery.timepicker.css';
 
-const BossModal = () => {
-    return (
-        <Modal id="boss-modal" className="modal">
-            <ModalBackground data-modal-bg />
-            <div className="modal-content">
-                <ModalTop>
-                    <h2>Edit Timer for Boss Name</h2>
-                </ModalTop>
-                <ModalBody>
-                    <p>New Killed Date/Time</p>
-                    <InputsWrapper>
-                        <Input type="date" />
-                        <Input type="time" />
-                    </InputsWrapper>
-                </ModalBody>
-                <span className="modal-close">&times;</span>
-            </div>
-        </Modal>
-    );
+class BossModal extends React.Component{
+    componentDidMount(){
+        this.initDatepicker();
+      }
+
+    initDatepicker(){
+        $(this.refs.timepicker).timepicker({
+            //timeFormat: 'h:mm p',
+            //interval: 30,
+            //minTime: '1',
+            //maxTime: '6:00pm',
+            //defaultTime: 'now',
+            //startTime: '8:00am',
+            dynamic: true,
+            dropdown: true,
+            scrollbar: true
+        });
+    }
+
+    handleChange = (e) => {
+        console.log(e.currentTarget.value)
+    }
+    render() {
+        return (
+            <Modal id="boss-modal" className="modal">
+                <ModalBackground data-modal-bg />
+                <div className="modal-content">
+                    <ModalTop>
+                        <h2 data-modal-title>Edit Timer for Boss Name</h2>
+                    </ModalTop>
+                    <ModalBody>
+                        <p>New Killed Date/Time</p>
+                        <InputsWrapper>
+                            <Input type="text" data-modal-date/>
+                            <Input
+                                type="text"
+                                ref='timepicker'
+                                data-modal-time
+                            />
+                        </InputsWrapper>
+                    </ModalBody>
+                    <span className="modal-close">&times;</span>
+                </div>
+            </Modal>
+        );
+    }
 }
 
 const Modal = styled.div`

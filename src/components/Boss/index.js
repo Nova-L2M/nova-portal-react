@@ -1,4 +1,5 @@
 import countdown from "countdown-updated";
+import date from "date-and-time";
 
 countdown.setLabels(
   ' mil| sec| min| hr| day| week| month| year| decade| century| millennium',
@@ -147,10 +148,33 @@ class Boss {
     return newElement;
   }
   openModal() {
+    // get the modal and modal content
     let modal = document.getElementById("boss-modal");
     let modalContent = modal.querySelector(".modal-content");
     let modalClose = modal.querySelector(".modal-close");
     let modalBG = modal.querySelector("[data-modal-bg]");
+    let modalName = modal.querySelector("[data-modal-title]");
+    let modalDate = modal.querySelector("[data-modal-date]");
+    let modalTime = modal.querySelector("[data-modal-time]");
+
+    // reset the modal
+    modalName.innerHTML = "";
+    // set the modal date and time to the current time
+    let now = new Date();
+    modalDate.value = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    // time format should be h:mm pm
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    let time = hours + ":" + minutes + " " + ampm;
+    modalTime.value = time;
+
+    // set the modal content
+    modalName.innerHTML = `Edit Timer for ${this.name}`;
+
     // animate the modal to open
     modal.classList.add("show");
     modalContent.classList.add("show");
@@ -160,6 +184,23 @@ class Boss {
       modalContent.classList.remove("show");
     }); 
     modalBG.addEventListener("click", () => {
+      modal.classList.remove("show");
+      modalContent.classList.remove("show");
+    });
+
+    // set the modal submit button to update the boss
+    modal.querySelector("[data-modal-submit]").addEventListener("click", () => {
+      let date = modalDate.value;
+      let time = modalTime.value;
+      let timestamp = new Date(`${date} ${time}`).getTime() / 1000;
+      this.updateBoss({
+        last_killed: {
+          seconds: timestamp,
+          nanoseconds: 0,
+        },
+        next_spawn: this.next_spawn,
+        updated_by: this.updated_by,
+      });
       modal.classList.remove("show");
       modalContent.classList.remove("show");
     });
