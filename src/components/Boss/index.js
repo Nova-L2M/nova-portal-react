@@ -1,5 +1,5 @@
 import countdown from "countdown-updated";
-import date from "date-and-time";
+import { db } from "../../firebase/config";
 
 countdown.setLabels(
   ' mil| sec| min| hr| day| week| month| year| decade| century| millennium',
@@ -156,9 +156,19 @@ class Boss {
     let modalName = modal.querySelector("[data-modal-title]");
     let modalDate = modal.querySelector("[data-modal-date]");
     let modalTime = modal.querySelector("[data-modal-time]");
+    let modalSubmit = modal.querySelector("[data-modal-submit]");
 
     // reset the modal
     modalName.innerHTML = "";
+    modalDate.value = "";
+    modalTime.value = "";
+    // clear the event listener on the submit button so it doesn't keep adding new event listeners
+    modalSubmit.removeEventListener("click", this.submitModal);
+    // clear the event listener on the close button so it doesn't keep adding new event listeners
+    modalClose.removeEventListener("click", this.closeModal);
+    // clear the event listener on the background so it doesn't keep adding new event listeners
+    modalBG.removeEventListener("click", this.closeModal);
+
     // set the modal date and time to the current time
     let now = new Date();
     modalDate.value = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -210,7 +220,9 @@ class Boss {
     this.last_killed = data.last_killed;
     this.next_spawn = data.next_spawn;
     this.updated_by = data.updated_by;
-    this.updateServer(3);
+    // update the boss on the server
+    let bossRef = db.collection("bosses").doc(this.id);
+    bossRef.update(data);
   }
   updateServer(server) {
     console.log(`Rerendering ${this.name} to Server #${server}`);

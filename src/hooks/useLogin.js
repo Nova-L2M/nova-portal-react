@@ -22,7 +22,7 @@ export const useLogin = () => {
       const docRef = doc(db, "users", res.user.uid);
       const docSnap = await getDoc(docRef);
       const user = docSnap.data();
-
+      
       dispatch({ type: "LOGIN", payload: user });
       console.log(user);
       setIsPending(false);

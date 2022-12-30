@@ -35,7 +35,7 @@ class BossModal extends React.Component{
                         <h2 data-modal-title>Edit Timer for Boss Name</h2>
                     </ModalTop>
                     <ModalBody>
-                        <p>New Killed Date/Time</p>
+                        <p>Enter New Killed Date/Time</p>
                         <InputsWrapper>
                             <Input type="text" data-modal-date/>
                             <Input
@@ -44,6 +44,16 @@ class BossModal extends React.Component{
                                 data-modal-time
                             />
                         </InputsWrapper>
+                        <SubmitButton type="submit" data-modal-submit>Update Timer</SubmitButton>
+                        <OrWrapper>
+                            <OrLine></OrLine>
+                            <OrText>OR</OrText>
+                            <OrLine></OrLine>
+                        </OrWrapper>
+                        <SubmitButton className="ghost" type="submit" data-modal-skip>Skipped</SubmitButton>
+                        <Description>If the boss didn't spawn, you can skip the timer to the next expected time. You can also use this if the boss was killed right away.</Description>
+                        <SubmitButton className="red" type="submit" data-modal-remove>Remove Timer</SubmitButton>
+                        <Description>As a LAST RESORT, you can remove the timer for this boss. Only use this option for server reset.</Description>
                     </ModalBody>
                     <span className="modal-close">&times;</span>
                 </div>
@@ -128,7 +138,7 @@ const ModalBody = styled.div`
     font-size: 12px;
     display:flex;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 15px;
 `
 const InputsWrapper = styled.div`
     display: flex;
@@ -144,5 +154,76 @@ const Input = styled.input`
     font-weight: 200;
     width: 100%;
     cursor: pointer;
+    &:focus {
+        outline: none;
+    }
+`
+const SubmitButton = styled.button`
+    padding: 10px 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    background-color: rgb(199 96 46 / 80%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 200;
+    width: 100%;
+    cursor: pointer;
+    transition: all ease .2s;
+    text-transform: uppercase;
+    &:focus {
+        outline: none;
+    }
+    &:hover {
+        background: rgb(199 96 46 / 100%);
+    }
+    &.ghost {
+        background-color: transparent;
+        color: #fff;
+        border: 1px solid rgb(199 96 46 / 80%);
+        color: #F6CA82;
+        &:hover {
+            background: rgb(199 96 46 / 80%);
+            color: #fff;
+        }
+    }
+    &.red {
+        background-color: transparent;
+        color: rgb(199 46 46 / 100%);
+        border: 1px solid rgb(199 46 46 / 100%);
+        &:hover {
+            background: rgb(199 46 46 / 100%);
+            color: #fff;
+        }
+    }
+
+`
+const OrWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+`
+const OrLine = styled.div`
+    flex: 1 0 auto;
+    height: 1px;
+    background-color: rgba(255,255,255,0.2);
+`
+const OrText = styled.div`
+    flex: 0 1 auto;
+    font-size: 12px;
+    font-weight: 200;
+    color: #FFF;
+    text-transform: uppercase;
+`
+const Description = styled.div`
+    margin-top: -5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 200;
+    color: #FFF;
+    text-align: center;
+    font-style: italic;
 `
 export default BossModal;

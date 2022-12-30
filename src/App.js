@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { createGlobalStyle } from "styled-components";
 import Boss from "./components/Boss";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "./contexts/AuthContext";
 import {
   Routes,
@@ -16,6 +16,8 @@ import Login from "./pages/Login";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase/config";
 import Isotope from "isotope-layout";
+import Header from "./layout/Header";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function App() {
   const { user, authIsReady } = useContext(AuthContext);
@@ -53,7 +55,23 @@ function Loading() {
   );
 }
 
-function AuthenticatedApp() {
+function AuthenticatedApp(props) {
+  // takes props.user and use it to get user data from firestore
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const getUserData = async () => {
+      const docRef = doc(db, "users", props.user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setUser(docSnap.data());
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+    };
+    getUserData();
+  }, [props.user.uid]);
+
   let bosses = {};
   useEffect(() => {
     let isUpdating = Object.keys(bosses).length > 1;
@@ -139,17 +157,20 @@ function AuthenticatedApp() {
     let bossList = document.getElementById("boss-list");
     bossListBody.style.height = `${bossList.offsetHeight}px`;
   }
-  return (
+  return user ? (
     <AppWrapper>
       <GlobalStyle />
       <Routes>
         <Route exact path="/" element={
           <>
-              <Bosses />
+              <Header user={user}/>
+              <Bosses user={user}/>
           </>
         } />
       </Routes>
     </AppWrapper>
+  ) : (
+    <Loading />
   );
 }
 
@@ -196,7 +217,7 @@ const GlobalStyle = createGlobalStyle`
   body {
     color: #fff;
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family:  "Noto Sans","Noto Sans JP","Noto Sans KR","Noto Sans Thai","Noto Sans Arabic",-apple-system,BlinkMacSystemFont,Roboto,Arial,"Microsoft YaHei","Microsoft JhengHei",sans-serif;
   }
 
   img {
@@ -251,6 +272,27 @@ const GlobalStyle = createGlobalStyle`
   .td-column h5 {
     margin: 0;
     text-transform: uppercase;
+  }
+  .ui-timepicker-wrapper {
+    overflow-y: auto;
+    max-height: 150px;
+    width: 219px;
+    color: #fff;
+    background: rgb(18 12 7 / 90%);
+    border: 1px solid rgb(0 0 0 / 80%);
+    box-shadow: 0 5px 10px rgb(0 0 0 / 20%);
+    outline: none;
+    z-index: 10052;
+    margin: 0;
+  }
+  .ui-timepicker-list li {
+    color:#fff;
+    font-size: 12px;
+  }
+
+  li.ui-timepicker-selected, .ui-timepicker-list li:hover, .ui-timepicker-list .ui-timepicker-selected:hover {
+    background: rgb(199 96 46);
+    color: #fff;
   }
 
   .boss-avatar-wrapper {

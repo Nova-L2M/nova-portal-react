@@ -11,10 +11,11 @@ const AuthContextProvider = ({ children }) => {
     user: null,
     authIsReady: false
   });
-  console.log(state);
+  // Check if user is logged in
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       dispatch({ type: "AUTH_IS_READY", payload: user });
+      
     });
     return unsubscribe;
   }, []);
