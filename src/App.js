@@ -175,22 +175,12 @@ function AuthenticatedApp(props) {
 }
 
 function UnauthenticatedApp() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const { login, isPending } = useLogin();
-
-  useEffect(() => {
-    if (token) {
-      login(token);
-    }
-  }, [token, login]);
-
   return (
     <Routes>
       <Route exact path="/" element={
         <>
           <GlobalStyle />
-          <Login isPending={isPending} />
+          <Login />
         </>
       } />
     </Routes>

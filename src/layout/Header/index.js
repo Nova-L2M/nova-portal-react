@@ -1,9 +1,11 @@
 import styled from 'styled-components';
 import LogoImg from '../../images/lineage2m-logo.png';
 import { useState, useEffect } from 'react';
+import { useLogout } from '../../hooks/useLogout';
 
 
 const Header = (props) => {
+  const { logout } = useLogout();
   //set state for user menu open and close
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   let user = props.user;
@@ -81,6 +83,9 @@ const Header = (props) => {
                 <Avatar src={discordAvatar} alt="User Avatar" />
               </AvatarWrapper>
               <Username>{user.username}</Username>
+              <LogoutLink onClick = {logout}>
+                Logout
+              </LogoutLink>
             </UserMenuTop1>
             <UserMenuTop2></UserMenuTop2>
           </UserMenuTop>
@@ -269,6 +274,19 @@ const UserMenuTop1 = styled.div`
 `
 const UserMenuTop2 = styled.div`
   flex: 0 1 auto;
+`
+const LogoutLink = styled.div`
+  color: rgb(255 255 255 / 100%);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all ease 0.2s;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  &:hover {
+    color: rgb(255 255 255 / 80%);
+  }
 `
 
 export default Header;

@@ -11,7 +11,8 @@ const Login = (props) => {
 
     useEffect(() => {
         if (token) {
-        login(token);
+          console.log(token)
+          login(token);
         }
     }, [token, login]);
     
@@ -26,8 +27,8 @@ const Login = (props) => {
                       You have to be a member of the Revolution alliance to use this
                       app.
                     </p>
-                    <LoginButton onClick={window.location.href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website_dev"}>
-                      {props.isPending ? "Loading..." : "Login With Discord"}
+                    <LoginButton href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website_dev">
+                      {isPending ? "Loading..." : "Login With Discord"}
                     </LoginButton>
                   </LoginWrapper>
                 </Column>
@@ -45,7 +46,7 @@ const LoginWrapper = styled.div`
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 30px;
     row-gap: 15px;
     & h1 {
         width: 100%;
@@ -55,20 +56,31 @@ const LoginWrapper = styled.div`
     }
     & p {
         width: 100%;
+        font-size: 14px;
         text-align: center;
     }
 `;
-const LoginButton = styled.button`
-    padding: 20px 20px;
+const LoginButton = styled.a`
+    padding: 10px 20px;
     cursor: pointer;
     outline: none;
-    border-radius: 3px;
+    border-radius: 999px;
     color: #fff;
     font-weight: 200;
     text-transform: uppercase;
     box-shadow: 0px 0px 15px 0px red;
     transition: all ease 0.2s;
+    background-color: rgb(199 96 46 / 80%);
+    border: 1px solid rgb(199 96 46 / 100%);
+    text-decoration: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:focus {
+        outline: none;
+    }
     &:hover {
+      background: rgb(199 96 46 / 100%);
     }
 `;
 
