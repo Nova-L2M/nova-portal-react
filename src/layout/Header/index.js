@@ -50,7 +50,7 @@ const Header = (props) => {
           <Username>{user.username}</Username>
         </UserMenuWrapper>
       </TopHeader>
-      <BottomHeader></BottomHeader>
+      {/* <BottomHeader></BottomHeader> */}
       <UserMenuContainer className={userMenuOpen ? "open" : ""}>
         <UserMenuBG 
           className={userMenuOpen ? "open" : ""}

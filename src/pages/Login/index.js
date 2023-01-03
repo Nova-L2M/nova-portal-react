@@ -1,20 +1,25 @@
 import styled from 'styled-components';
 import { AppWrapper, Container, Row, Column } from '../../App'
 import { useEffect } from 'react';
-import { useSearchParams } from "react-router-dom";
 import { useLogin } from "../../hooks/useLogin";
 
 const Login = (props) => {
-    const [searchParams] = useSearchParams();
-    const token = searchParams.get("token");
-    const { login, error, isPending } = useLogin();
+    const { login, isPending } = useLogin();
 
     useEffect(() => {
+        let searchParams = new URLSearchParams(window.location.search);
+        let token = searchParams.get("token");
+        // clear token from url
+        window.history.replaceState({}, document.title, "/");
+        // if token exists, login
+        
         if (token) {
           console.log(token)
           login(token);
+          //clear token variable
+          token = null;
         }
-    }, [token, login]);
+    }, [login]);
     
     return (
           <AppWrapper>
@@ -22,13 +27,12 @@ const Login = (props) => {
               <Row>
                 <Column className="centered">
                   <LoginWrapper>
-                    <h1>Login Required</h1>
+                    <h1>Members Only</h1>
                     <p>
-                      You have to be a member of the Revolution alliance to use this
-                      app.
+                      You have to be a member of the Revolution alliance to use this app. If you are a member, please login with your Discord account.
                     </p>
                     <LoginButton href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website_dev">
-                      {isPending ? "Loading..." : "Login With Discord"}
+                      {isPending ? "Loading..." : "Login"}
                     </LoginButton>
                   </LoginWrapper>
                 </Column>
@@ -58,6 +62,7 @@ const LoginWrapper = styled.div`
         width: 100%;
         font-size: 14px;
         text-align: center;
+        margin-bottom: 10px;
     }
 `;
 const LoginButton = styled.a`
