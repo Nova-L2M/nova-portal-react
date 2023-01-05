@@ -12,7 +12,6 @@ const Login = (props) => {
         // clear token from url
         window.history.replaceState({}, document.title, "/");
         // if token exists, login
-        
         if (token) {
           console.log(token)
           login(token);

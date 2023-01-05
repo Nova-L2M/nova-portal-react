@@ -153,6 +153,7 @@ const HamburgerMenu = styled.div`
     }
   }
 `
+
 const Spacer = styled.div`
   flex: 1;
 `

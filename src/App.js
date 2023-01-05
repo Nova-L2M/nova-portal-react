@@ -1,21 +1,16 @@
 import styled from "styled-components";
 import { createGlobalStyle } from "styled-components";
-import Boss from "./components/Boss";
 import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "./contexts/AuthContext";
 import {
   Routes,
-  Route,
-  useSearchParams
+  Route
 } from "react-router-dom";
-import { useLogin } from "./hooks/useLogin";
 import bgImg from "./images/background.jpeg";
 import spinner from "./images/loading-spinner.svg";
 import Bosses from "./pages/Bosses";
 import Login from "./pages/Login";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase/config";
-import Isotope from "isotope-layout";
 import Header from "./layout/Header";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -72,91 +67,6 @@ function AuthenticatedApp(props) {
     getUserData();
   }, [props.user.uid]);
 
-  let bosses = {};
-  useEffect(() => {
-    let isUpdating = Object.keys(bosses).length > 1;
-    if (isUpdating) {
-
-    } else {
-      addBosses();
-    }
-  });
-  async function addBosses() {
-    let bossTable = document.getElementById("boss-list-body");
-    const q = query(collection(db, "bosses"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        let key = doc.id;
-        let bossObject = new Boss(bossTable, {
-          id: key,
-          name: doc.data().name,
-          image: doc.id,
-          level: doc.data().level,
-          is_server_boss: doc.data().is_server_boss,
-          is_interval_timer: doc.data().is_interval_timer,
-          interval: doc.data().interval,
-          last_killed: doc.data().last_killed,
-          next_spawn: doc.data().next_spawn,
-          spawns: doc.data().spawns,
-          rarity: doc.data().rarity,
-          rate: doc.data().rate,
-          updated_by: doc.data().updated_by
-        });
-        bosses[`${key}`] = bossObject;
-        // if this is the last boss, then init set column widths and init isotope
-        if (Object.keys(bosses).length === querySnapshot.size) {
-          setTable(initIsotope);
-        }
-      });
-      querySnapshot.docChanges().forEach((change) => {
-        if (change.type === "modified") {
-          console.log("Modified Boss: ", change.doc.data());
-          let key = change.doc.id;
-          let bossObject = bosses[`${key}`];
-          if (bossObject.is_interval_timer) {
-            bossObject.updateBoss(change.doc.data());
-          }
-        }
-      });
-    });
-  }
-  function setTable(callback) {
-    // Set the width for each column in the table header
-    let headerArray = document.querySelectorAll("th");
-    headerArray.forEach((header) => {
-      let width = header.offsetWidth;
-      header.style.width = `${width}px`;
-    });
-    // TODO: Set the width for each column
-    let rowArray = document.querySelectorAll(".boss-row");
-    rowArray.forEach((row) => {
-      let columnArray = row.querySelectorAll("td");
-      columnArray.forEach((column) => {
-        let width = column.offsetWidth;
-        column.style.width = `${width}px`;
-      });
-    });
-    if (callback) {
-      callback();
-    }
-  }
-  function initIsotope() {
-    // init Isotope
-    console.log('init isotope');
-    var iso = new Isotope('#boss-list', {
-      itemSelector: '.boss-row',
-      layoutMode: 'vertical',
-      getSortData: {
-        timestamp: '[data-timestamp] parseInt'
-      }
-    });
-    // sort by timestamp
-    iso.arrange({ sortBy: 'timestamp' });
-    // adjust height of boss-list-body
-    let bossListBody = document.getElementById("boss-list-body");
-    let bossList = document.getElementById("boss-list");
-    bossListBody.style.height = `${bossList.offsetHeight}px`;
-  }
   return user ? (
     <AppWrapper>
       <GlobalStyle />
@@ -406,7 +316,7 @@ const AppWrapper = styled.div`
   background-repeat: no-repeat;
   background-color: #000;
   background-attachment: fixed;
-  padding: 145px 0 75px 0;
+  padding: 90px 0 75px 0;
 `;
 const Container = styled.div`
   display: flex;

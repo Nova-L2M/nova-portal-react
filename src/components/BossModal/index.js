@@ -44,15 +44,15 @@ class BossModal extends React.Component{
                                 data-modal-time
                             />
                         </InputsWrapper>
-                        <SubmitButton type="submit" data-modal-submit>Update Timer</SubmitButton>
+                        <SubmitButton data-modal-submit>Update Timer</SubmitButton>
                         <OrWrapper>
                             <OrLine></OrLine>
                             <OrText>OR</OrText>
                             <OrLine></OrLine>
                         </OrWrapper>
-                        <SubmitButton className="ghost" type="submit" data-modal-skip>Skipped</SubmitButton>
+                        <SubmitButton className="ghost" data-modal-skip>Skipped</SubmitButton>
                         <Description>If the boss didn't spawn, you can skip the timer to the next expected time. You can also use this if the boss was killed right away.</Description>
-                        <SubmitButton className="red" type="submit" data-modal-remove>Remove Timer</SubmitButton>
+                        <SubmitButton className="red" data-modal-remove>Remove Timer</SubmitButton>
                         <Description>As a LAST RESORT, you can remove the timer for this boss. Only use this option for server reset.</Description>
                     </ModalBody>
                     <span className="modal-close">&times;</span>
@@ -158,7 +158,7 @@ const Input = styled.input`
         outline: none;
     }
 `
-const SubmitButton = styled.button`
+const SubmitButton = styled.div`
     padding: 10px 20px;
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 999px;
