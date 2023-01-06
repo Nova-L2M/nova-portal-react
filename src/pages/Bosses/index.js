@@ -11,7 +11,9 @@ class Bosses extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      bosses: []
+      bosses: [],
+      server: 4,
+      isotope: null,
     };
     this.fetchBosses();
   }
@@ -20,6 +22,35 @@ class Bosses extends React.Component {
   }
   componentWillUnmount() {
     this.unsubscribe();
+  }
+  componentDidUpdate() {
+    // initialize Isotope if it hasn't been already
+    if (this.state.isotope === null) {
+      console.log(`The Boss table component has initially mounted.`);
+      this.prepIsotope();
+      this.setState({
+        isotope: new Isotope("#boss-list-body", {
+          itemSelector: ".boss-row",
+          layoutMode: "vertical",
+          getSortData: {
+            next_spawn: "[data-timestamp] parseInt"
+          },
+          sortBy: "next_spawn",
+          sortAscending: true,
+        }),
+      });
+    }
+    // if it has been initialized, sort the items by next_spawn
+    else {
+      console.log(`The Boss table component has updated.`);
+      // use the updateSortData method on the isotope instance
+      this.state.isotope.updateSortData(this.state.isotope.getItemElements());
+      // sort the items by next_spawn
+      this.state.isotope.arrange({
+        sortBy: "next_spawn",
+        sortAscending: true,
+      });
+    }
   }
   async fetchBosses() {
     let bosses = [];
@@ -82,10 +113,47 @@ class Bosses extends React.Component {
                 ...state.bosses.slice(0, bossIndex),
                 bossObject,
                 ...state.bosses.slice(bossIndex + 1),
-              ], 
+              ],
+              server: state.server
             }
           ));
         }
+      });
+    });
+  }
+  sortBosses(direction) {
+    if (direction === 'ascending') {
+      console.log('sorting ascending')
+      this.state.isotope.arrange({
+        sortBy: "next_spawn",
+        sortAscending: true,
+      });
+    } else {
+      console.log('sorting descending')
+      this.state.isotope.arrange({
+        sortBy: "next_spawn",
+        sortAscending: false,
+      });
+    }
+  }
+  prepIsotope() {
+    // determine the width of each column in the table and set their width inline
+    let table = document.getElementById("boss-list");
+    let columns = table.querySelectorAll("th");
+    let columnWidths = [];
+    columns.forEach((column) => {
+      columnWidths.push(column.offsetWidth);
+    });
+    // set the width of each column in the header
+    columns.forEach((column, index) => {
+      column.style.width = columnWidths[index] + "px";
+    });
+    // set the width of each column in each row
+    let rows = table.querySelectorAll("tbody tr");
+    rows.forEach((row) => {
+      let columns = row.querySelectorAll("td");
+      columns.forEach((column, index) => {
+        column.style.width = columnWidths[index] + "px";
       });
     });
   }

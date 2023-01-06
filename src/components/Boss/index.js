@@ -39,8 +39,9 @@ class Boss extends React.Component {
         this.times = this.calculateTimes();
         this.timer = null;
     }
-    shouldComponentUpdate(nextProps, nextState) {
+    shouldComponentUpdate(nextProps) {
         if (this.props.boss !== nextProps.boss) {
+            console.log(`Boss ${this.name} will update`);
             this.times = this.calculateTimes();
             this.forceUpdate();
             this.updateTimer();
@@ -48,8 +49,10 @@ class Boss extends React.Component {
         }
         return false;
     }
-    componentDidUpdate() {
-        console.log(`Boss ${this.name} updated`);
+    componentDidUpdate(nextProps) {
+        if (this.props.boss !== nextProps.boss) {
+            console.log(`Boss ${this.name} updated`);
+        }
     }
     calculateTimes() {
         let server, lastKilledTimestamp, lastKilled, nextSpawnTimestamp, nextSpawn, updatedBy;
