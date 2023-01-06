@@ -47,7 +47,8 @@ class Bosses extends React.Component {
       if (querySnapshot.size === bosses.length) {
         this.setState({ bosses: bosses });
       }
-    }); 
+    });
+      
   }
   fetchBossChanges() {
     const q = query(collection(db, "bosses"));
@@ -130,9 +131,9 @@ class Bosses extends React.Component {
                     </tr>
                   </thead>
                   <tbody id="boss-list-body">
-                    {this.state.bosses.map((boss) => {
-                      return <Boss key={boss.id} boss={boss} />;
-                    })}
+                    {this.state.bosses.map((boss) => (
+                      <Boss key={boss.id} boss={boss} />
+                    ))}
                   </tbody>
                 </table>
               </Column>
