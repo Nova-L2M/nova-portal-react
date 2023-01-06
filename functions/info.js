@@ -17,6 +17,6 @@ exports.oauthKeys = {
 
 exports.whitelist = {
   default: "/api/user",
-  nova_website: "https://nova-tools-app.web.app/login",
+  nova_website: "https://nova-tools-app.web.app",
   nova_website_dev: "http://localhost:3000"
 }

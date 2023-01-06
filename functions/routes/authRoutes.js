@@ -23,7 +23,7 @@ module.exports = (app) => {
   //IF DENIED ACCESS, LOG THEM OUT AND SHOW THEM A DENIED PAGE
   app.get("/denied", async (req, res) => {
     await firebase.auth().signOut()
-    return res.status(500).json({ success: false, error: 'You are not a member of the CodeupClassroom organization on Github and are not able to login at this time.' })
+    return res.status(500).json({ success: false, error: 'You are not a member of the Revolution Alliance discord and are not able to login at this time.' })
   })
   // THIS IS THE OAUTH2 CALLBACK ROUTE
   app.get(

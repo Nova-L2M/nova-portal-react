@@ -30,7 +30,7 @@ const Login = (props) => {
                     <p>
                       You have to be a member of the Revolution alliance to use this app. If you are a member, please login with your Discord account.
                     </p>
-                    <LoginButton href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website_dev">
+                    <LoginButton href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website">
                       {isPending ? "Loading..." : "Login"}
                     </LoginButton>
                   </LoginWrapper>
