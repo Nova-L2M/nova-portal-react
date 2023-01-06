@@ -250,9 +250,17 @@ class Boss extends React.Component {
         });
     }
     updateDatabase(data, server) {
-        this.last_killed[server - 1] = data.last_killed;
-        this.next_spawn[server - 1] = data.next_spawn;
-        this.updated_by[server - 1] = data.updated_by;
+        
+        if (this.is_server_boss) {
+            this.last_killed[server - 1] = data.last_killed;
+            this.next_spawn[server - 1] = data.next_spawn;
+            this.updated_by[server - 1] = data.updated_by;
+        }
+        else {
+            this.last_killed = data.last_killed;
+            this.next_spawn = data.next_spawn;
+            this.updated_by = data.updated_by;
+        }
         let updatedData = {
           last_killed: this.last_killed,
           next_spawn: this.next_spawn,
