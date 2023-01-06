@@ -141,7 +141,6 @@ class Bosses extends React.Component {
           </Container>
     );
   }
-  
 }
 
 function setTable(callback) {

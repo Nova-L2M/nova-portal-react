@@ -12,7 +12,6 @@ countdown.setLabels(
   );
 
 class Boss extends React.Component {
-    //TODO: add all props to state and update state on props change
     constructor(props) {
         super(props);
         this.id = props.boss.id;
@@ -40,8 +39,17 @@ class Boss extends React.Component {
         this.times = this.calculateTimes();
         this.timer = null;
     }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.boss !== nextProps.boss) {
+            this.times = this.calculateTimes();
+            this.forceUpdate();
+            this.updateTimer();
+            return true;
+        }
+        return false;
+    }
     componentDidUpdate() {
-        this.times = this.calculateTimes();
+        console.log(`Boss ${this.name} updated`);
     }
     calculateTimes() {
         let server, lastKilledTimestamp, lastKilled, nextSpawnTimestamp, nextSpawn, updatedBy;
@@ -133,7 +141,8 @@ class Boss extends React.Component {
             </tr>
         );
     }
-    componentDidMount() {
+    updateTimer() {
+        window.clearInterval(this.timer);
         let newElement = document.getElementById(this.id);
         let timerId = countdown(
         new Date(this.times.nextSpawn), 
@@ -158,6 +167,9 @@ class Boss extends React.Component {
                 this.openModal();
             });
         }
+    }
+    componentDidMount() {
+        this.updateTimer();
     }
     openModal() {
         // get the modal and modal content
@@ -243,37 +255,10 @@ class Boss extends React.Component {
           next_spawn: this.next_spawn,
           updated_by: this.updated_by
         };
-        console.log(updatedData);
+        // console.log(updatedData);
         // update the boss on the server
         let bossRef = doc(db, "bosses", this.id);
         updateDoc(bossRef, updatedData);
-    }
-    updateGUI(data) {
-        window.clearInterval(this.timer);
-        this.last_killed = data.last_killed;
-        this.next_spawn = data.next_spawn;
-        this.updated_by = data.updated_by;
-        let times = this.calculateTimes();
-        this.element.querySelector("[data-timestamp]").setAttribute = times.nextSpawn;
-        this.element.querySelector("[data-last-killed]").innerHTML = times.lastKilled;
-        this.element.querySelector("[data-next-spawn]").innerHTML = times.nextSpawn;
-        this.element.querySelector("[data-updated-by]").innerHTML = times.updatedBy;
-        let timerId = countdown(
-          new Date(times.nextSpawn), 
-          (ts) => {
-            let countdown = ts.toHTML();
-            let timer = this.element.querySelector(`[data-countdown="${this.id}"]`);
-            if (ts.value > 0) {
-                timer.innerHTML = `SPAWNED!`;
-            }
-            else {
-              timer.innerHTML = countdown;
-            }
-          },
-          countdown.DAYS | countdown.HOURS | countdown.MINUTES | countdown.SECONDS,
-          2
-        );
-        this.timer = timerId;
     }
 }
 
