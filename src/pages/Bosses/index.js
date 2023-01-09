@@ -23,33 +23,23 @@ class Bosses extends React.Component {
   componentWillUnmount() {
     this.unsubscribe();
   }
-  componentDidUpdate() {
-    // initialize Isotope if it hasn't been already
-    if (this.state.isotope === null) {
-      console.log(`The Boss table component has initially mounted.`);
-      this.prepIsotope();
-      this.setState({
-        isotope: new Isotope("#boss-list-body", {
-          itemSelector: ".boss-row",
-          layoutMode: "vertical",
-          getSortData: {
-            next_spawn: "[data-timestamp] parseInt"
-          },
-          sortBy: "next_spawn",
-          sortAscending: true,
-        }),
-      });
-    }
-    // if it has been initialized, sort the items by next_spawn
-    else {
-      console.log(`The Boss table component has updated.`);
-      // use the updateSortData method on the isotope instance
-      this.state.isotope.updateSortData(this.state.isotope.getItemElements());
-      // sort the items by next_spawn
-      this.state.isotope.arrange({
-        sortBy: "next_spawn",
-        sortAscending: true,
-      });
+  componentDidUpdate(prevProps, prevState) {
+    let allChildrenUpdated = true;
+
+    React.Children.forEach(this.props.children, (child, index) => {
+      if (child.props !== prevProps.children[index].props) {
+        allChildrenUpdated = false;
+      }
+    });
+
+    if (allChildrenUpdated) {
+      // all the children have updated, so run your sorting function
+      this.sortBosses();
+      console.log("The Bosses component has updated.")
+      // wait a quarter second to make sure the DOM has updated
+      setTimeout(() => {
+        this.sortBosses();
+      }, 100);
     }
   }
   async fetchBosses() {
@@ -88,8 +78,9 @@ class Bosses extends React.Component {
         if (change.type === "modified") {
           console.log("Modified Boss: ", change.doc.data());
           let key = change.doc.id;
-          // change the boss in the state
-          let bossObject = {
+          let newBosses = this.state.bosses.slice();
+          let bossIndex = newBosses.findIndex((boss) => boss.id === key);
+          newBosses[bossIndex] = {
             id: key,
             name: change.doc.data().name,
             image: change.doc.id,
@@ -104,35 +95,40 @@ class Bosses extends React.Component {
             rate: change.doc.data().rate,
             updated_by: change.doc.data().updated_by
           };
-          let bossIndex = this.state.bosses.findIndex((boss) => boss.id === key);
-          let bosses = this.state.bosses;
-          bosses[bossIndex] = bossObject;
-          this.setState((state) => (
-            { 
-              bosses: [
-                ...state.bosses.slice(0, bossIndex),
-                bossObject,
-                ...state.bosses.slice(bossIndex + 1),
-              ],
-              server: state.server
-            }
-          ));
+          this.setState(
+            { bosses: newBosses },
+            () => {
+              console.log("Bosses state has been updated.");
+            });
         }
       });
     });
   }
-  sortBosses(direction) {
-    if (direction === 'ascending') {
-      console.log('sorting ascending')
+  sortBosses() {
+    // initialize Isotope if it hasn't been already
+    if (this.state.isotope === null) {
+      console.log(`The Boss table component has initially mounted.`);
+      this.prepIsotope();
+      this.setState({
+        isotope: new Isotope("#boss-list-body", {
+          itemSelector: ".boss-row",
+          layoutMode: "vertical",
+          getSortData: {
+            next_spawn: "[data-timestamp] parseInt"
+          },
+          sortBy: "next_spawn",
+          sortAscending: true,
+        }),
+      });
+    }
+    // if it has been initialized, sort the items by next_spawn
+    else {
+      // use the updateSortData method on the isotope instance
+      this.state.isotope.updateSortData(this.state.isotope.getItemElements());
+      // sort the items by next_spawn
       this.state.isotope.arrange({
         sortBy: "next_spawn",
         sortAscending: true,
-      });
-    } else {
-      console.log('sorting descending')
-      this.state.isotope.arrange({
-        sortBy: "next_spawn",
-        sortAscending: false,
       });
     }
   }
@@ -200,7 +196,7 @@ class Bosses extends React.Component {
                   </thead>
                   <tbody id="boss-list-body">
                     {this.state.bosses.map((boss) => (
-                      <Boss key={boss.id} boss={boss} />
+                      <Boss key={boss.id} boss={boss} server={this.state.server} />
                     ))}
                   </tbody>
                 </table>
@@ -209,44 +205,6 @@ class Bosses extends React.Component {
           </Container>
     );
   }
-}
-
-function setTable(callback) {
-  // Set the width for each column in the table header
-  let headerArray = document.querySelectorAll("th");
-  headerArray.forEach((header) => {
-    let width = header.offsetWidth;
-    header.style.width = `${width}px`;
-  });
-  // TODO: Set the width for each column
-  let rowArray = document.querySelectorAll(".boss-row");
-  rowArray.forEach((row) => {
-    let columnArray = row.querySelectorAll("td");
-    columnArray.forEach((column) => {
-      let width = column.offsetWidth;
-      column.style.width = `${width}px`;
-    });
-  });
-  if (callback) {
-    callback();
-  }
-}
-function initIsotope() {
-  // init Isotope
-  console.log('init isotope');
-  var iso = new Isotope('#boss-list', {
-    itemSelector: '.boss-row',
-    layoutMode: 'vertical',
-    getSortData: {
-      timestamp: '[data-timestamp] parseInt'
-    }
-  });
-  // sort by timestamp
-  iso.arrange({ sortBy: 'timestamp' });
-  // adjust height of boss-list-body
-  let bossListBody = document.getElementById("boss-list-body");
-  let bossList = document.getElementById("boss-list");
-  bossListBody.style.height = `${bossList.offsetHeight}px`;
 }
 
 export default Bosses;
