@@ -32,16 +32,16 @@ class Boss extends React.Component {
         this.rate = props.boss.rate;
         this.updated_by = props.boss.updated_by;
         this.spawns = props.boss.is_interval_timer ? null : props.boss.spawns;
-        this.timer = null;
         this.server = props.server;
         this.state = {
+            timer: null,
             sortTable: false,
             server: props.server,
             updated_by: this.getUpdatedBy(),
             last_killed: this.getLastKilled(),
             next_spawn: this.getNextSpawn(),
-            last_killed_timestamp: this.getLastKilledTimestamp(),
-            next_spawn_timestamp: this.getNextSpawnTimestamp(),
+            last_killed_timestamp: this.getLastKilled(true),
+            next_spawn_timestamp: this.getNextSpawn(true),
         };
     }
     getUpdatedBy = () => {
@@ -56,40 +56,63 @@ class Boss extends React.Component {
             return updatedBy;
         }
     }
-    getLastKilled = () => {
+    getLastKilled = (timestamp) => {
         let lastKilled;
         if (this.props.boss.last_killed) {
-            lastKilled = this.props.boss.is_server_boss ? this.props.boss.last_killed[this.props.server - 1] : this.props.boss.last_killed;
+            if (this.props.boss.is_interval_timer) {
+                lastKilled = this.props.boss.last_killed[this.props.server - 1];
+            }
+            else {
+                lastKilled = this.props.boss.last_killed;
+            }
         }
         if (lastKilled) {
-            return new Date(lastKilled.seconds * 1000).toLocaleString();
+            if (timestamp) {
+                return lastKilled.seconds;
+            }
+            else {
+                return new Date(lastKilled.seconds * 1000).toLocaleString();
+            }
         }
     }
-    getNextSpawn = () => {
-        let nextSpawn;
-        if (this.props.boss.next_spawn) {
-            nextSpawn = this.props.boss.is_server_boss ? this.props.boss.next_spawn[this.props.server - 1] : this.props.boss.next_spawn;
+    getNextSpawn = (timestamp) => {
+        let nextSpawn, nextSpawnTimestamp;
+        if (this.props.boss.is_interval_timer) {
+            if (this.props.boss.is_server_boss) {
+                nextSpawn = this.props.boss.next_spawn[this.props.server - 1].seconds;
+            }
+            else {
+                nextSpawn = this.props.boss.next_spawn.seconds;
+            }
+        }
+        else {
+            let recurringTimesArray = this.props.boss.spawns;
+            // get timestamp for right now
+            let now = Math.floor(Date.now() / 1000);
+            // For each object in the array, calculate the next time it will occur. Save the next time in a new array.
+            let nextTimesArray = [];
+            recurringTimesArray.forEach((time) => {
+                let nextTime = time.start;
+                while (nextTime < now) {
+                    nextTime += time.interval;
+                }
+                nextTimesArray.push(nextTime);
+            });
+            // Get the smallest value in the array
+            nextSpawnTimestamp = Math.min(...nextTimesArray);
+            nextSpawn = nextSpawnTimestamp;
         }
         if (nextSpawn) {
-            return new Date(nextSpawn.seconds * 1000).toLocaleString();
+            if (timestamp) {
+                // console.log(this.props.boss.name, nextSpawn);
+                return nextSpawn;
+            }
+            else {
+                return new Date(nextSpawn * 1000).toLocaleString();
+            }
         }
-    }
-    getLastKilledTimestamp = () => {
-        let lastKilledTimestamp;
-        if (this.props.boss.last_killed) {
-            lastKilledTimestamp = this.props.boss.is_server_boss ? this.props.boss.last_killed[this.props.server - 1] : this.props.boss.last_killed;
-        }
-        if (lastKilledTimestamp) {
-            return lastKilledTimestamp.seconds;
-        }
-    }
-    getNextSpawnTimestamp = () => {
-        let nextSpawnTimestamp;
-        if (this.props.boss.next_spawn) {
-            nextSpawnTimestamp = this.props.boss.is_server_boss ? this.props.boss.next_spawn[this.props.server - 1] : this.props.boss.next_spawn;
-        }
-        if (nextSpawnTimestamp) {
-            return nextSpawnTimestamp.seconds;
+        else {
+            console.log(`Boss ${this.props.boss.name} has no next spawn time.`)
         }
     }
     shouldComponentUpdate = (nextProps) => {
@@ -103,24 +126,23 @@ class Boss extends React.Component {
     }
     componentDidUpdate = (prevProps) => {
         if (this.props.boss !== prevProps.boss) {
-            console.log('Prev props:', prevProps);
-            console.log('Current props:', this.props);
+            // console.log('Prev props:', prevProps);
+            // console.log('Current props:', this.props);
             this.setState({
                 server: 4,
                 updated_by: this.getUpdatedBy(),
                 last_killed: this.getLastKilled(),
                 next_spawn: this.getNextSpawn(),
-                last_killed_timestamp: this.getLastKilledTimestamp(),
-                next_spawn_timestamp: this.getNextSpawnTimestamp(),
+                last_killed_timestamp: this.getLastKilled(true),
+                next_spawn_timestamp: this.getNextSpawn(true),
             }, () => {
-                console.log(`Boss ${this.props.boss.name} updated`);
+                // console.log(`Boss ${this.props.boss.name} updated`);
                 this.updateTimer();
                 this.forceUpdate();
             });
         }
     }
     componentWillUnmount = () => {
-        console.log(`Boss ${this.props.boss.name} will unmount`);
         clearInterval(this.timer);
     }
     render = () => {
@@ -176,7 +198,10 @@ class Boss extends React.Component {
         );
     }
     updateTimer = () => {
-        window.clearInterval(this.timer);
+        if (this.state.timer) {
+            window.clearInterval(this.state.timer);
+        }
+        let willReset = false;
         let newElement = document.getElementById(this.props.boss.id);
         let timerId = countdown(
         new Date(this.state.next_spawn), 
@@ -184,7 +209,12 @@ class Boss extends React.Component {
             let countdown = ts.toHTML();
             let timer = newElement.querySelector(`[data-countdown="${this.props.boss.id}"]`);
             if (ts.value > 0) {
-                timer.innerHTML = `SPAWNED!`;
+                if (this.props.boss.is_interval_timer) {
+                    timer.innerHTML = `SPAWNED!`;
+                }
+                else {
+                    willReset = true;
+                }
             }
             else {
             timer.innerHTML = countdown;
@@ -193,7 +223,26 @@ class Boss extends React.Component {
         countdown.DAYS | countdown.HOURS | countdown.MINUTES | countdown.SECONDS,
         3
         );
-        this.timer = timerId;
+        if (willReset) {
+            this.setState({
+                server: 4,
+                next_spawn: this.getNextSpawn(),
+                next_spawn_timestamp: this.getNextSpawn(true),
+                timer: timerId
+            }, () => {
+                console.log(`Boss ${this.props.boss.name} updated`);
+                this.updateTimer();
+                this.forceUpdate();
+            });
+        }
+        else {
+            this.setState({
+                timer: timerId
+            }, () => {
+                console.log(`Boss ${this.props.boss.name} timer updated`);
+                this.forceUpdate();
+            });
+        }
     }
     componentDidMount = () => {
         this.updateTimer();
