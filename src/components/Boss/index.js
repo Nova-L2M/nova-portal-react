@@ -128,7 +128,7 @@ class Boss extends React.Component {
             <tr className="boss-row" id={this.props.boss.id} data-timestamp={this.state.next_spawn_timestamp}>
                 <td>
                     <div className="td-row">
-                        <div className={'boss-avatar-wrapper' + ((this.rarity === 'legendary' && this.is_server_boss) ? ' fire' : '')}>
+                        <div className={'boss-avatar-wrapper' + ((this.rarity === 'legendary' && this.props.boss.is_server_boss) ? ' fire' : '')}>
                             <img src={this.image} className="boss-avatar" />
                         </div>
                         <div className="boss-name-wrapper">
@@ -136,9 +136,9 @@ class Boss extends React.Component {
                             <div className="boss-details">
                                 <div className="boss-type">{this.props.boss.is_server_boss ? "Server" : "World"}</div>
                                 ·
-                                <div className="boss-rarity">{this.rarity}</div>
+                                <div className="boss-rarity">{this.props.boss.rarity}</div>
                                 ·
-                                <div className="boss-interval">{this.rate}% Every {this.interval} Hrs</div>
+                                <div className="boss-interval">{this.props.boss.rate}% Every {this.props.boss.interval} Hrs</div>
                             </div>
                         </div>
                     </div>
