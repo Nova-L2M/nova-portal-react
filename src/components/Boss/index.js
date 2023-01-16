@@ -308,30 +308,62 @@ class Boss extends React.Component {
     
         // set the modal submit button to update the boss
         modal.querySelector("[data-modal-submit]").addEventListener("click", async () => {
-          let date = modalDate.value;
-          let time = modalTime.value;
-          let timestamp = new Date(`${date} ${time}`).getTime() / 1000;
-          //turn the interval from hours into seconds
-          let interval = this.interval * 60 * 60;
-          let nextSpawn = timestamp + interval;
-          //get the uid of the current user
-          let uid = auth.currentUser.uid;
-          //use the uid to get the username of the current user
-          let docRef = doc(db, "users", uid);
-          let userObject = await getDoc(docRef);
-          let updatedBy = userObject.data().username;
-          this.updateDatabase({
-            server: 4,
-            last_killed: new Timestamp(timestamp, 0),
-            next_spawn: new Timestamp(nextSpawn, 0),
-            updated_by: updatedBy
-          }, 4);
-          modal.classList.remove("show");
-          modalContent.classList.remove("show");
+            //Get user info
+            let uid = auth.currentUser.uid;
+            let docRef = doc(db, "users", uid);
+            let userObject = await getDoc(docRef);
+            let updatedBy = userObject.data().username;
+            let userServer = userObject.data().server;
+            let canUpdateTimer = userObject.data().is_boss_manager;
+
+            if(!canUpdateTimer){
+                alert("You don't have permission to skip timers! Suck a wee wee 🍆");
+            } else {
+                let date = modalDate.value;
+                let time = modalTime.value;
+                let timestamp = new Date(`${date} ${time}`).getTime() / 1000;
+                //turn the interval from hours into seconds
+                let interval = this.interval * 60 * 60;
+                let nextSpawn = timestamp + interval;
+                this.updateDatabase({
+                    last_killed: new Timestamp(timestamp, 0),
+                    next_spawn: new Timestamp(nextSpawn, 0),
+                    updated_by: updatedBy
+                }, userServer);
+                modal.classList.remove("show");
+                modalContent.classList.remove("show");
+            }
+        });
+    
+        // set the modal skip button to skip the boss
+        modal.querySelector("[data-modal-skip]").addEventListener("click", async () => {
+            //Get user info
+            let uid = auth.currentUser.uid;
+            let docRef = doc(db, "users", uid);
+            let userObject = await getDoc(docRef);
+            let updatedBy = userObject.data().username;
+            let userServer = userObject.data().server;
+            let canUpdateTimer = userObject.data().is_boss_manager;
+
+            if(!canUpdateTimer){
+                alert("You don't have permission to skip timers! Suck a wee wee 🍆");
+            } else {
+                //Calculate next spawn
+                let interval = this.interval * 60 * 60;
+                let nextSpawn = this.next_spawn[userServer - 1].seconds + interval;
+                //Update in database
+                this.updateDatabase({
+                    last_killed: this.last_killed[userServer - 1],
+                    next_spawn: new Timestamp(nextSpawn, 0),
+                    updated_by: updatedBy
+                }, userServer);
+    
+                modal.classList.remove("show");
+                modalContent.classList.remove("show");
+            }
         });
     }
-    updateDatabase = (data, server) => {
-        
+    updateDatabase = (data, server) => {        
         if (this.props.boss.is_server_boss) {
             this.props.boss.last_killed[server - 1] = data.last_killed;
             this.props.boss.next_spawn[server - 1] = data.next_spawn;
