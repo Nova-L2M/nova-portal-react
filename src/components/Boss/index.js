@@ -351,7 +351,7 @@ class Boss extends React.Component {
         let canUpdateTimer = userObject.data().is_boss_manager;
 
         if(!canUpdateTimer){
-            alert("You don't have permission to skip timers! Suck a wee wee 🍆");
+            alert("You don't have permission to submit timers!");
         } else {
             let date = this.modal.date.value;
             let time = this.modal.time.value;
@@ -380,7 +380,7 @@ class Boss extends React.Component {
         let canUpdateTimer = userObject.data().is_boss_manager;
 
         if(!canUpdateTimer){
-            alert("You don't have permission to skip timers! Suck a wee wee 🍆");
+            alert("You don't have permission to skip timers!");
         } else {
             //Calculate next spawn
             let interval = this.interval * 60 * 60;
