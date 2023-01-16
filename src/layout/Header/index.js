@@ -143,7 +143,7 @@ const HamburgerMenu = styled.div`
   &:hover {
     color: rgb(255 255 255 / 100%);
     svg #line1 {
-      transform: translate3d(1px,0,0) rotate(45deg) scaleX(.6);
+      transform: rotate(45deg) scaleX(.6);
     }
     svg #line2 {
       transform: rotate(180deg);
