@@ -146,58 +146,6 @@ class Boss extends React.Component {
     componentWillUnmount = () => {
         clearInterval(this.timer);
     }
-    render = () => {
-        return (
-            <tr className="boss-row" id={this.props.boss.id} data-timestamp={this.state.next_spawn_timestamp}>
-                <td>
-                    <div className="td-row">
-                        <div className={'boss-avatar-wrapper' + ((this.rarity === 'legendary' && this.props.boss.is_server_boss) ? ' fire' : '')}>
-                            <img src={this.image} className="boss-avatar" />
-                        </div>
-                        <div className="boss-name-wrapper">
-                            <h4 className="boss-name">{this.props.boss.name}</h4>
-                            <div className="boss-details">
-                                <div className="boss-type">{this.props.boss.is_server_boss ? "Server" : "World"}</div>
-                                ·
-                                <div className="boss-rarity">{this.props.boss.rarity}</div>
-                                ·
-                                <div className="boss-interval">{this.props.boss.rate}% Every {this.props.boss.interval} Hrs</div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div className="td-column">
-                        {
-                            this.is_interval_timer
-                                ? (
-                                    <>
-                                        <h5 className="subdue">Last Kill</h5>
-                                        <h5 data-last-killed={this.state.last_killed_timestamp}>{this.state.last_killed}</h5>
-                                        <h5 className="updatedby" data-updated-by={this.state.updated_by}>Updated By {this.state.updated_by}</h5>
-                                    </>
-                                )
-                                : ""
-                        }
-                    </div>
-                </td>
-                <td>
-                    <div className="td-column">
-                        <h5 className="subdue">Next Spawn</h5>
-                        <h5 data-next-spawn={this.state.next_spawn_timestamp}>{this.state.next_spawn}</h5>
-                        <h5 className="updatedby">{this.rate}% Chance</h5>
-                    </div>
-                </td>
-                <td>
-                    <div className="countdown" data-countdown={this.props.boss.id}>
-                        {
-                            '--'
-                        }
-                    </div>
-                </td>
-            </tr>
-        );
-    }
     updateTimer = () => {
         if (this.state.timer) {
             window.clearInterval(this.state.timer);
@@ -270,7 +218,6 @@ class Boss extends React.Component {
             skip: document.getElementById("boss-modal").querySelector("[data-modal-skip]")
         }
         this.modal = modal;
-    
         // reset the modal
         modal.name.innerHTML = "";
         modal.date.value = "";
@@ -283,7 +230,6 @@ class Boss extends React.Component {
         modal.close.removeEventListener("click", this.closeModal);
         // clear the event listener on the background so it doesn't keep adding new event listeners
         modal.bg.removeEventListener("click", this.closeModal);
-    
         // set the modal date and time to the current time
         let now = new Date();
         modal.date.value = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -296,28 +242,22 @@ class Boss extends React.Component {
         minutes = minutes < 10 ? "0" + minutes : minutes;
         let time = hours + ":" + minutes + " " + ampm;
         modal.time.value = time;
-    
         // set the modal content
         modal.name.innerHTML = `Edit Timer for ${this.props.boss.name}`;
-    
         // animate the modal to open
         modal.element.classList.add("show");
         modal.content.classList.add("show");
         // animate the modal to close if the user clicks the close button or the background
-        modal.close.addEventListener("click", () => {
-          modal.element.classList.remove("show");
-          modal.content.classList.remove("show");
-        }); 
-        modal.bg.addEventListener("click", () => {
-          modal.element.classList.remove("show");
-          modal.content.classList.remove("show");
-        });
-    
+        modal.close.addEventListener("click", this.closeModal); 
+        modal.bg.addEventListener("click", this.closeModal);
         // set the modal submit button to update the boss
         modal.element.querySelector("[data-modal-submit]").addEventListener("click", this.handleModalSubmit);
-    
         // set the modal skip button to skip the boss
         modal.element.querySelector("[data-modal-skip]").addEventListener("click", this.handleModalSkip);
+    }
+    closeModal = () => {
+        this.modal.element.classList.remove("show");
+        this.modal.content.classList.remove("show");
     }
     updateDatabase = async (data, server) => {        
         if (this.props.boss.is_server_boss) {
@@ -395,6 +335,58 @@ class Boss extends React.Component {
             this.modal.element.classList.remove("show");
             this.modal.content.classList.remove("show");
         }
+    }
+    render = () => {
+        return (
+            <tr className="boss-row" id={this.props.boss.id} data-timestamp={this.state.next_spawn_timestamp}>
+                <td>
+                    <div className="td-row">
+                        <div className={'boss-avatar-wrapper' + ((this.rarity === 'legendary' && this.props.boss.is_server_boss) ? ' fire' : '')}>
+                            <img src={this.image} className="boss-avatar" />
+                        </div>
+                        <div className="boss-name-wrapper">
+                            <h4 className="boss-name">{this.props.boss.name}</h4>
+                            <div className="boss-details">
+                                <div className="boss-type">{this.props.boss.is_server_boss ? "Server" : "World"}</div>
+                                ·
+                                <div className="boss-rarity">{this.props.boss.rarity}</div>
+                                ·
+                                <div className="boss-interval">{this.props.boss.rate}% Every {this.props.boss.interval} Hrs</div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div className="td-column">
+                        {
+                            this.is_interval_timer
+                                ? (
+                                    <>
+                                        <h5 className="subdue">Last Kill</h5>
+                                        <h5 data-last-killed={this.state.last_killed_timestamp}>{this.state.last_killed}</h5>
+                                        <h5 className="updatedby" data-updated-by={this.state.updated_by}>Updated By {this.state.updated_by}</h5>
+                                    </>
+                                )
+                                : ""
+                        }
+                    </div>
+                </td>
+                <td>
+                    <div className="td-column">
+                        <h5 className="subdue">Next Spawn</h5>
+                        <h5 data-next-spawn={this.state.next_spawn_timestamp}>{this.state.next_spawn}</h5>
+                        <h5 className="updatedby">{this.rate}% Chance</h5>
+                    </div>
+                </td>
+                <td>
+                    <div className="countdown" data-countdown={this.props.boss.id}>
+                        {
+                            '--'
+                        }
+                    </div>
+                </td>
+            </tr>
+        );
     }
 }
 
