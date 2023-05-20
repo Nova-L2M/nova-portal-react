@@ -28,9 +28,9 @@ const Login = (props) => {
                   <LoginWrapper>
                     <h1>Members Only</h1>
                     <p>
-                      You have to be a member of the Revolution alliance to use this app. If you are a member, please login with your Discord account.
+                      You have to be a member of the Revolution B4 Alliance to use this app. If you are a member, please login with your Discord account.
                     </p>
-                    <LoginButton href="https://us-central1-nova-tools-app.cloudfunctions.net/api/login/nova_website">
+                    <LoginButton href="https://us-central1-l2m-db.cloudfunctions.net/api/login/l2m_website_dev">
                       {isPending ? "Loading..." : "Login"}
                     </LoginButton>
                   </LoginWrapper>

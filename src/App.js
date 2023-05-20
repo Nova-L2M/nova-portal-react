@@ -58,6 +58,7 @@ function AuthenticatedApp(props) {
       const docRef = doc(db, "users", props.user.uid);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
+        debugger
         setUser(docSnap.data());
       } else {
         // doc.data() will be undefined in this case

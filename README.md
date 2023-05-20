@@ -1,10 +1,8 @@
-# Project Nova (React)
+# Project L2M DB (React)
 ## Demo link:
-Current version of the Boss Timer tool is live on the [Revolution Alliance website](https://www.revolution-alliance.com) 
-Access Project Nova and the new React version at [nova-tools-app.web.app](https://nova-tools-app.web.app)
+Access Project L2M DB and the new React version at [l2m-db.web.app](https://l2m-db.web.app)
 
 ## Table of Content:
-
 - [About The App](#about-the-app)
 - [Technologies](#technologies)
 - [Setup](#setup)
@@ -12,7 +10,7 @@ Access Project Nova and the new React version at [nova-tools-app.web.app](https:
 - [Credits](#credits)
 
 ## About The App
-Project Nova is a web app to reinforce the efforts of the Revolution Alliance. Right now, it's mostly focused on perfecting the Boss Timer tool.
+Project L2M DB is a web app to help manage players in L2M. Right now, it's mostly focused on gathering gear/soul information. This was based on an already existing app [nova-portal-react](https://github.com/Nova-L2M/nova-portal-react)
 
 ## Technologies
 - `React`
@@ -36,7 +34,5 @@ Project Nova is a web app to reinforce the efforts of the Revolution Alliance. R
 
 ## Credits
 List of contriubutors:
-- [Jason Merrell](#)
 - [Joao Nuno Brito](#)
-- [Whatever Side's Name Is](#)
 

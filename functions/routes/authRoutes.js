@@ -11,6 +11,7 @@ const whitelist = require("../info").whitelist
 
 module.exports = (app) => {
   app.get("/logout", async (req, res) => {
+    console.log("TEMP DEBUG2: ");
     await firebase.auth().signOut()
     req.logout()
     res.redirect("/api/user")
@@ -18,6 +19,8 @@ module.exports = (app) => {
   //IF THERE IS AN ERROR, LOG THEM OUT
   //TODO - SEND THEM TO AN ERROR PAGE
   app.get("/error", async (req, res) => {
+    console.log("TEMP DEBUG3: ");
+
     req.logout()
   })
   //IF DENIED ACCESS, LOG THEM OUT AND SHOW THEM A DENIED PAGE
@@ -36,16 +39,21 @@ module.exports = (app) => {
 
       const customToken = await admin.auth().createCustomToken(req.user.uid);
 
+      console.log("TEMP DEBUG: ");
+      console.log("CALLBACK URL: " + callback_url);      
+      console.log("WHITELIST DEFAULT: " + whitelist['default']);
+      console.log("FINAL REDIRECT: " + `${callback_url}?token=${customToken}`)
+
       // Production callback
-      if (callback_url != whitelist['default'])
-        req.logout();
+      //if (callback_url != whitelist['default'])
+        //req.logout();
       res.redirect(`${callback_url}?token=${customToken}`);
     }
   )
   app.get(
     "/login/:referrer", async function (req, res) {
       console.log("REFERRER FOLLOWS:");
-      console.log(req.param("referrer"));
+      console.log(req.params.referrer);
       referrer = req.params.referrer || "Unknown";
       res.redirect("/api/login");
     }
@@ -56,7 +64,8 @@ module.exports = (app) => {
       scope: scopes,
       failureRedirect: "/error",
     }),
-    async function (req, res) {
+    async function (req, res) {      
+      console.log("TRYING TO SIGN IN WITH CUSTOM TOKEN");
       await firebase.auth().signInWithCustomToken(req.user.token)
     }
   )

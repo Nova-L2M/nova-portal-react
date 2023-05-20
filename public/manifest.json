@@ -1,6 +1,6 @@
 {
-    "short_name": "NovaReactApp",
-    "name": "The front-end UI for the Nova Portal",
+    "short_name": "L2MReactApp",
+    "name": "The front-end UI for the L2M App Portal",
     "icons": [
       {
         "src": "favicon.ico",
